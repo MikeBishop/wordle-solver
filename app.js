@@ -24,13 +24,7 @@ function evaluateSingleGuess(guess, feedback, wordlist) {
 
         // For gray letters, determine exact count of letter
         if( feedback[i] == "-" && exactCount[letter] == null ) {
-            let occurrences = 0;
-            for (let j = 0; j < guess.length; j++) {
-                if( guess[j] == letter && ["G", "Y"].includes(feedback[j]) ) {
-                    occurrences += 1;
-                }
-            }
-            exactCount[letter] = occurrences;
+            exactCount[letter] = countOccurrencesInGuess(guess, feedback, letter);
         }
 
         // Identify can't-match indices
@@ -44,13 +38,7 @@ function evaluateSingleGuess(guess, feedback, wordlist) {
         }
 
         if (feedback[i] == "Y" && exactCount[letter] == null ) {
-            let occurrences = 0;
-            for (let j = 0; j < guess.length; j++) {
-                if (guess[j] == letter && ["G", "Y"].includes(feedback[j])) {
-                    occurrences += 1;
-                }
-            }
-            minCount[letter] = occurrences;
+            minCount[letter] = countOccurrencesInGuess(guess, feedback, letter);
         }
     }
 
@@ -62,6 +50,7 @@ function evaluateSingleGuess(guess, feedback, wordlist) {
     }
 
     return wordlist.filter(word => {
+        // Filter out anything that doesn't have letters in known positions
         for( const letter in greens ) {
             let indices = greens[letter];
             for( const index of indices ) {
@@ -70,6 +59,8 @@ function evaluateSingleGuess(guess, feedback, wordlist) {
                 }
             }
         }
+
+        // Filter out anything that contains letters in bad positions
         for( const letter in notMatch ) {
             let indices = notMatch[letter];
             for( const index of indices ) {
@@ -78,14 +69,15 @@ function evaluateSingleGuess(guess, feedback, wordlist) {
                 }
             }
         }
+
+        // Filter out anything that doesn't have the right number of each letter
         for( const letter in exactCount) {
-            // Hacky way to count occurrences of letter in word
-            if( (word.split(letter).length - 1) != exactCount[letter] ) {
+            if (countOccurrencesInWord(word, letter) != exactCount[letter] ) {
                 return false;
             }
         }
         for( const letter in minCount ) {
-            if( (word.split(letter).length - 1) < minCount[letter]) {
+            if( countOccurrencesInWord(word, letter) < minCount[letter]) {
                 return false;
             }
         }
@@ -94,12 +86,30 @@ function evaluateSingleGuess(guess, feedback, wordlist) {
     });
 }
 
+function countOccurrencesInGuess(guess, feedback, letter) {
+    let occurrences = 0;
+    for (let j = 0; j < guess.length; j++) {
+        if (guess[j] == letter && ["G", "Y"].includes(feedback[j])) {
+            occurrences += 1;
+        }
+    }
+    return occurrences;
+}
+
+function countOccurrencesInWord(word, letter) {
+    // Hacky way to count occurrences of letter in word
+    return word.split(letter).length - 1;
+}
+
 function evaluateMultipleGuesses(guesses, feedbacks, wordlist) {
     for( let i = 0; i < guesses.length; i++ ) {
-        console.log(`${wordlist.length} words before guess ${i}`);
+        console.log(`${guesses[i]} is${wordlist.includes(guesses[i]) ? "" : " not"} in the word list`);
         wordlist = evaluateSingleGuess(guesses[i], feedbacks[i], wordlist);
-        if( wordlist.length < 10 ) {
+        if( wordlist.length < 25 ) {
             console.log(`Words after guess ${i}: ${wordlist}`);
+        }
+        else {
+            console.log(`Guess ${i} narrowed list to ${wordlist.length} words`);
         }
     }
     
@@ -113,6 +123,8 @@ function wordleReal(guesses, feedbacks) {
 module.exports = { evaluateSingleGuess, evaluateMultipleGuesses, wordleReal };
 
 console.log(
-    wordleReal(["CRATE", "WROTE", "BRUTE"], ["-G-GG", "-G-GG", "-G-GG"])
+    wordleReal(
+        ["STORY", "ADIEU", "CRUET", "UNSET"],
+        ["YY---", "---GY", "--YGG", "G-GGG"])
 )
 
