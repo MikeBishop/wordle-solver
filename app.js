@@ -1,7 +1,5 @@
 const masterWordList = require ("./words.json");
 
-// Implement your exercise in this file.  If you need to implement additional functions,
-// remember to export them as well, if you need to access them in your unit test.
 function evaluateSingleGuess(guess, feedback, wordlist) {
 
     let greens = {};
@@ -37,7 +35,7 @@ function evaluateSingleGuess(guess, feedback, wordlist) {
             }
         }
 
-        if (feedback[i] == "Y" && exactCount[letter] == null ) {
+        if (feedback[i] == "Y" && exactCount[letter] == null && minCount[letter] == null ) {
             minCount[letter] = countOccurrencesInGuess(guess, feedback, letter);
         }
     }
@@ -125,6 +123,7 @@ module.exports = { evaluateSingleGuess, evaluateMultipleGuesses, wordleReal };
 console.log(
     wordleReal(
         ["STORY", "ADIEU", "CRUET", "UNSET"],
-        ["YY---", "---GY", "--YGG", "G-GGG"])
-)
+        ["YY---", "---GY", "--YGG", "G-GGG"]
+    )
+);
 
