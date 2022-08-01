@@ -25,7 +25,7 @@ function evaluateSingleGuess(guess, feedback, wordlist) {
             exactCount[letter] = countOccurrencesInGuess(guess, feedback, letter);
         }
 
-        // Identify can't-match indices
+        // Identify can't-match indices (yellow and gray)
         if( ["Y", "-"].includes(feedback[i]) ) {
             if (notMatch[letter] == null) {
                 notMatch[letter] = [i];
@@ -35,16 +35,11 @@ function evaluateSingleGuess(guess, feedback, wordlist) {
             }
         }
 
+        // For yellows, know minimum number of occurrences.
+        // Only useful if we don't know exact number.
         if (feedback[i] == "Y" && exactCount[letter] == null && minCount[letter] == null ) {
             minCount[letter] = countOccurrencesInGuess(guess, feedback, letter);
         }
-    }
-
-    // For yellows, two pieces of data:
-    //  - Not in that position
-    //  - Minimum number of occurrences
-    for (let i = 0; i < guess.length; i++) {
-        let letter = guess[i];
     }
 
     return wordlist.filter(word => {
@@ -122,8 +117,8 @@ module.exports = { evaluateSingleGuess, evaluateMultipleGuesses, wordleReal };
 
 console.log(
     wordleReal(
-        ["STORY", "ADIEU", "CRUET", "UNSET"],
-        ["YY---", "---GY", "--YGG", "G-GGG"]
+        ["STORY", "ADIEU", "RALPH", "PRANK", "GRAMP"],
+        ["---Y-", "Y----", "YY-Y-", "YGG--", "-GGGG"]
     )
 );
 
